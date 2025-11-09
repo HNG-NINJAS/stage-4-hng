@@ -1,0 +1,96 @@
+# ============================================
+# Global
+# ============================================
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Python virtualenvs
+venv/
+.env/
+.env.* 
+*.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.poetry/
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+pnpm-debug.log
+dist/
+build/
+.cache/
+
+# TypeScript
+*.tsbuildinfo
+
+# .NET/C#
+bin/
+obj/
+*.user
+*.suo
+*.pdb
+*.mdb
+*.cache/
+*.db
+.vs/
+
+# Docker
+*.pid
+docker-data/
+docker-compose.override.yml
+
+# JetBrains / VSCode / Editors
+.idea/
+.vscode/
+*.code-workspace
+
+# OS files
+*.bak
+*.orig
+
+# ============================================
+# Project-specific ignores
+# ============================================
+
+# Logs for all services
+services/*/logs/
+logs/
+
+# Compiled protobufs
+shared/proto/**/*.pb.*
+shared/proto/**/gen/
+
+# Shared schemas build cache
+shared/schemas/.cache/
+shared/contracts/.cache/
+
+# Generated documentation or diagrams
+docs/*.svg
+docs/*.png
+docs/generated/
+
+# Monitoring tools
+monitoring/grafana/data/
+monitoring/prometheus/data/
+
+# Scripts cache
+scripts/*.log
+
+# ============================================
+# Docker Compose generated files
+# ============================================
+docker-compose.dev.override.yml
+.docker/
