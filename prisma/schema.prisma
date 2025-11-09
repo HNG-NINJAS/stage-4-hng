@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum NotificationType {
+  EMAIL
+  PUSH
+}
+
+enum NotificationStatus {
+  QUEUED
+  PROCESSING
+  SENT
+  DELIVERED
+  FAILED
+  BOUNCED
+  OPENED
+  CLICKED
+}
+
+enum EmailProvider {
+  SMTP
+  MAILGUN
+  SENDGRID
+}
+
+enum NotificationEventType {
+  QUEUED
+  PROCESSING_STARTED
+  USER_FETCHED
+  TEMPLATE_FETCHED
+  EMAIL_RENDERED
+  SENT_TO_PROVIDER
+  DELIVERED
+  FAILED
+  RETRY_SCHEDULED
+  MOVED_TO_DLQ
+  OPENED
+  CLICKED
+  BOUNCED
+}
+
+model NotificationLog {
+  id                   BigInt                 @id @default(autoincrement())
+  notification_id      String                 @unique @db.Uuid
+  user_id              String                 @db.VarChar(100)
+  type                 NotificationType       @default(EMAIL)
+  status               NotificationStatus     @default(QUEUED)
+  // Email specific details 
+  email_to             String?                @db.VarChar(255)
+  email_from           String?
+  subject              String?
+  template_id          String?
+  provider             EmailProvider?
+  //Tracking
+  attempts             Int                    @default(0)
+  error_message        String?                @db.Text()
+  //Provider response 
+  provider_message_id  String                 @db.VarChar(255)
+  provider_status_code Int?
+  provider_response    Json?
+  //TimeStamps
+  sent_at              DateTime?
+  delivered_at         DateTime?
+  opened_at            DateTime?
+  clicked_at           DateTime?
+  created_at           DateTime               @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime               @updatedAt @db.Timestamptz(6)
+  expires_at           DateTime               @default(dbgenerated("NOW() + INTERVAL '30 days'")) @db.Timestamptz(6)
+  //Relations
+  variables            NotificationVariable[]
+  events               NotificationEvent[]
+  tracking_events      EmailTrackingEvent[]
+
+  //Indexes
+  @@index([notification_id])
+  @@index([user_id])
+  @@index([status])
+  @@index([expires_at])
+  @@index([created_at(sort: Desc)])
+  @@map("notification_logs")
+}
+
+model NotificationVariable {
+  id              BigInt          @id @default(autoincrement())
+  notification_id String          @db.Uuid
+  variable_key    String          @db.VarChar(100)
+  variable_value  String?         @db.Text
+  created_at      DateTime        @default(now())
+  //Relations
+  notification    NotificationLog @relation(fields: [notification_id], references: [notification_id], onDelete: Cascade)
+}
+
+model NotificationEvent {
+  id              BigInt                @id @default(autoincrement())
+  notification_id String                @db.Uuid
+  event_type      NotificationEventType
+  description     String?
+  metaData        Json?
+  created_at      DateTime              @default(now()) @db.Timestamptz(6)
+  // Relations
+  notification    NotificationLog       @relation(fields: [notification_id], references: [notification_id])
+
+  @@index([notification_id])
+  @@index([created_at(sort: Desc)])
+  @@map("notification_events")
+}
+
+model EmailTrackingEvent{
+  id BigInt @id @default(autoincrement())
+  notification_id String @db.Uuid
+  event_type String @db.VarChar(50)
+  user_agent String? @db.Text
+  ip_address String @db.Inet
+  url String? @db.VarChar(500)
+  timeStamp DateTime @default(now()) @db.Timestamptz(6)
+  metadata Json?
+  //relation
+  notification NotificationLog @relation(fields: [notification_id],references: [notification_id],onDelete: Cascade)
+  @@index([notification_id])
+  @@index([event_type])
+  @@index([timeStamp(sort: Desc)])
+  @@map("email_tracking_events")
+}
