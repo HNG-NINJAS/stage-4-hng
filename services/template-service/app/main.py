@@ -16,6 +16,8 @@ from app.config import get_settings
 from app.database import init_db, check_db_connection
 from app.api import templates, health, metrics
 from app.api.metrics import track_request
+from app.utils.rabbitmq import rabbitmq_client
+from app.utils.cache import cache_client
 
 # Configure logging
 settings = get_settings()
@@ -65,6 +67,25 @@ async def lifespan(app: FastAPI):
             logger.info("✅ Database connection verified")
         else:
             logger.warning("⚠️ Database connection check failed")
+        
+        # Initialize RabbitMQ
+        try:
+            if rabbitmq_client.connect():
+                logger.info("✅ RabbitMQ connected successfully")
+            else:
+                logger.warning("⚠️ RabbitMQ connection failed, events disabled")
+        except Exception as e:
+            logger.warning(f"⚠️ RabbitMQ initialization failed: {str(e)}")
+        
+        # Test Redis connection
+        try:
+            if cache_client.client:
+                cache_client.client.ping()
+                logger.info("✅ Redis cache connected successfully")
+            else:
+                logger.warning("⚠️ Redis not configured, caching disabled")
+        except Exception as e:
+            logger.warning(f"⚠️ Redis connection failed: {str(e)}, caching disabled")
     else:
         logger.info("⚠️ Running in test mode - skipping database initialization")
     
@@ -74,6 +95,14 @@ async def lifespan(app: FastAPI):
     
     # Shutdown
     logger.info("Shutting down Template Service...")
+    
+    # Close RabbitMQ connection
+    try:
+        rabbitmq_client.close()
+        logger.info("✅ RabbitMQ connection closed")
+    except Exception as e:
+        logger.error(f"Error closing RabbitMQ: {str(e)}")
+    
     logger.info("👋 Goodbye!")
 
 

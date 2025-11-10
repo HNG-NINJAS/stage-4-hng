@@ -2,7 +2,7 @@
 Configuration management using Pydantic Settings
 """
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
 from functools import lru_cache
 from typing import Optional
 
@@ -10,16 +10,14 @@ from typing import Optional
 class Settings(BaseSettings):
     """Application settings"""
     
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        case_sensitive=False
-    )
-    
     # Database
     database_url: str
     
-    # Redis (optional)
+    # Redis
     redis_url: Optional[str] = None
+    
+    # RabbitMQ
+    rabbitmq_url: Optional[str] = "amqp://admin:admin123@localhost:5672/"
     
     # Service
     service_name: str = "template-service"
@@ -38,6 +36,13 @@ class Settings(BaseSettings):
     
     # CORS
     cors_origins: list = ["*"]
+    
+    # Cache TTL (seconds)
+    cache_ttl: int = 300  # 5 minutes
+    
+    class Config:
+        env_file = ".env"
+        case_sensitive = False
 
 
 @lru_cache()

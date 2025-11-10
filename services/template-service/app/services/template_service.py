@@ -7,10 +7,15 @@ from sqlalchemy import and_, or_
 from typing import List, Optional, Dict, Any, Tuple
 from uuid import UUID
 import logging
+import time
 
 from app.models import Template, TemplateVersion, TemplateTranslation
 from app.schemas import TemplateCreate, TemplateUpdate
 from app.utils.renderer import TemplateRenderer
+
+from app.utils.rabbitmq import get_rabbitmq_client
+from app.utils.cache import get_cache_client
+
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +32,8 @@ class TemplateService:
         """
         self.db = db
         self.renderer = TemplateRenderer()
+        self.rabbitmq = get_rabbitmq_client()
+        self.cache = get_cache_client()
     
     def create_template(self, template_data: TemplateCreate) -> Template:
         """
@@ -94,12 +101,23 @@ class TemplateService:
         self.db.commit()
         self.db.refresh(template)
         
+        # Publish event
+        self.rabbitmq.publish_event(
+            routing_key='template.created',
+            message={
+                'template_id': template.template_id,
+                'name': template.name,
+                'type': template.type,
+                'created_at': template.created_at.isoformat()
+            }
+        )
+        
         logger.info(f"Template '{template_data.template_id}' created successfully")
         return template
     
     def get_template(self, template_id: str) -> Optional[Template]:
         """
-        Get template by template_id
+        Get template by template_id with caching
         
         Args:
             template_id: Template identifier
@@ -107,12 +125,30 @@ class TemplateService:
         Returns:
             Template if found, None otherwise
         """
-        return self.db.query(Template).filter(
+        # Try cache first
+        cache_key = f"template:{template_id}"
+        cached = self.cache.get(cache_key)
+        if cached:
+            logger.debug(f"Template '{template_id}' retrieved from cache")
+            # Note: Cached data is dict, we still fetch from DB for full object
+            # This is a simple cache check - full object caching can be added later
+        
+        template = self.db.query(Template).filter(
             and_(
                 Template.template_id == template_id,
                 Template.is_active == True
             )
         ).first()
+        
+        # Cache the result
+        if template:
+            self.cache.set(cache_key, {
+                'template_id': template.template_id,
+                'name': template.name,
+                'type': template.type
+            })
+        
+        return template
     
     def get_template_by_uuid(self, uuid: UUID) -> Optional[Template]:
         """
@@ -264,6 +300,19 @@ class TemplateService:
         self.db.commit()
         self.db.refresh(template)
         
+        # Invalidate cache
+        self.cache.delete(f"template:{template_id}")
+        
+        # Publish event
+        self.rabbitmq.publish_event(
+            routing_key='template.updated',
+            message={
+                'template_id': template.template_id,
+                'name': template.name,
+                'updated_at': template.updated_at.isoformat()
+            }
+        )
+        
         return template
     
     def delete_template(self, template_id: str) -> bool:
@@ -283,6 +332,18 @@ class TemplateService:
         
         template.is_active = False
         self.db.commit()
+        
+        # Invalidate cache
+        self.cache.delete(f"template:{template_id}")
+        
+        # Publish event
+        self.rabbitmq.publish_event(
+            routing_key='template.deleted',
+            message={
+                'template_id': template.template_id,
+                'deleted_at': time.time()
+            }
+        )
         
         logger.info(f"Template '{template_id}' soft deleted")
         return True
