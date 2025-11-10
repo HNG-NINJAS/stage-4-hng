@@ -2,13 +2,18 @@
 Configuration management using Pydantic Settings
 """
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 from typing import Optional
 
 
 class Settings(BaseSettings):
     """Application settings"""
+    
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=False
+    )
     
     # Database
     database_url: str
@@ -33,10 +38,6 @@ class Settings(BaseSettings):
     
     # CORS
     cors_origins: list = ["*"]
-    
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
 
 
 @lru_cache()

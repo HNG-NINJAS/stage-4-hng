@@ -50,19 +50,23 @@ async def lifespan(app: FastAPI):
     logger.info(f"Environment: {settings.environment}")
     logger.info("=" * 50)
     
-    # Initialize database
-    try:
-        init_db()
-        logger.info("✅ Database initialized successfully")
-    except Exception as e:
-        logger.error(f"❌ Failed to initialize database: {str(e)}")
-        raise
-    
-    # Check database connection
-    if check_db_connection():
-        logger.info("✅ Database connection verified")
+    # Skip database initialization if running tests (dependency override is set)
+    if not app.dependency_overrides:
+        # Initialize database
+        try:
+            init_db()
+            logger.info("✅ Database initialized successfully")
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize database: {str(e)}")
+            raise
+        
+        # Check database connection
+        if check_db_connection():
+            logger.info("✅ Database connection verified")
+        else:
+            logger.warning("⚠️ Database connection check failed")
     else:
-        logger.warning("⚠️ Database connection check failed")
+        logger.info("⚠️ Running in test mode - skipping database initialization")
     
     logger.info(f"🚀 Service ready on port {settings.port}")
     
@@ -168,7 +172,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
     
     return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=422,  # HTTP_422_UNPROCESSABLE_CONTENT
         content={
             "success": False,
             "error": "VALIDATION_ERROR",

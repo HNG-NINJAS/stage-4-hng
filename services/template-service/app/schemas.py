@@ -2,7 +2,7 @@
 Pydantic schemas for request/response validation (snake_case)
 """
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from uuid import UUID
@@ -37,7 +37,7 @@ class TemplateVersionBase(BaseModel):
     subject: Optional[str] = None
     body: str
     variables: List[str] = Field(default_factory=list)
-    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    template_metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
 class TemplateVersionCreate(TemplateVersionBase):
@@ -47,14 +47,13 @@ class TemplateVersionCreate(TemplateVersionBase):
 
 class TemplateVersionResponse(TemplateVersionBase):
     """Template version response"""
+    model_config = ConfigDict(from_attributes=True)
+    
     id: UUID
     template_id: UUID
     is_current: bool
     created_at: datetime
     created_by: Optional[str] = None
-
-    class Config:
-        from_attributes = True
 
 
 class TemplateTranslationBase(BaseModel):
@@ -63,7 +62,8 @@ class TemplateTranslationBase(BaseModel):
     subject: Optional[str] = Field(None, max_length=500)
     body: str = Field(..., min_length=1)
 
-    @validator('language_code')
+    @field_validator('language_code')
+    @classmethod
     def validate_language_code(cls, v):
         """Ensure lowercase language code"""
         return v.lower().strip()
@@ -76,14 +76,13 @@ class TemplateTranslationCreate(TemplateTranslationBase):
 
 class TemplateTranslationResponse(TemplateTranslationBase):
     """Translation response"""
+    model_config = ConfigDict(from_attributes=True)
+    
     id: UUID
     template_id: UUID
     is_active: bool
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class TemplateBase(BaseModel):
@@ -94,7 +93,8 @@ class TemplateBase(BaseModel):
     type: str = Field(..., pattern="^(email|push|sms)$")
     category: Optional[str] = Field(None, max_length=100)
 
-    @validator('template_id')
+    @field_validator('template_id')
+    @classmethod
     def validate_template_id(cls, v):
         """Ensure valid template ID format"""
         # Allow letters, numbers, underscore, hyphen
@@ -124,14 +124,13 @@ class TemplateUpdate(BaseModel):
 
 class TemplateResponse(TemplateBase):
     """Template response"""
+    model_config = ConfigDict(from_attributes=True)
+    
     id: UUID
     is_active: bool
     created_at: datetime
     updated_at: datetime
     current_version: Optional[TemplateVersionResponse] = None
-
-    class Config:
-        from_attributes = True
 
 
 class TemplateDetailResponse(TemplateResponse):
@@ -153,7 +152,8 @@ class RenderRequest(BaseModel):
     data: Dict[str, Any] = Field(..., description="Variables to substitute in template")
     language_code: Optional[str] = Field(default="en", min_length=2, max_length=10)
 
-    @validator('data')
+    @field_validator('data')
+    @classmethod
     def validate_data(cls, v):
         """Ensure data is not empty"""
         if not v:

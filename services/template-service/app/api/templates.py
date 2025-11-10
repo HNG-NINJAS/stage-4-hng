@@ -88,7 +88,7 @@ def create_template(
 def list_templates(
     page: int = Query(1, ge=1, description="Page number"),
     limit: int = Query(10, ge=1, le=100, description="Items per page"),
-    type: Optional[str] = Query(None, regex="^(email|push|sms)$", description="Filter by type"),
+    type: Optional[str] = Query(None, pattern="^(email|push|sms)$", description="Filter by type"),
     category: Optional[str] = Query(None, description="Filter by category"),
     search: Optional[str] = Query(None, description="Search in name/description"),
     db: Session = Depends(get_db)
@@ -463,7 +463,7 @@ def get_template_versions(
             "is_current": v.is_current,
             "created_at": v.created_at.isoformat(),
             "created_by": v.created_by,
-            "metadata": v.metadata
+            "template_metadata": v.template_metadata
         } for v in versions]
         
         track_operation("get_versions", "success")

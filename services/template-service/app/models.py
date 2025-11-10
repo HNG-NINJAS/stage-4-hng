@@ -5,7 +5,7 @@ SQLAlchemy database models
 from sqlalchemy import Column, String, Text, Boolean, DateTime, JSON, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 from app.database import Base
 
@@ -22,8 +22,8 @@ class Template(Base):
     type = Column(String(50), nullable=False, index=True)  # email, push, sms
     category = Column(String(100), nullable=True, index=True)  # welcome, alert, marketing
     is_active = Column(Boolean, default=True, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
     
     # Relationships
     versions = relationship(
@@ -54,9 +54,9 @@ class TemplateVersion(Base):
     subject = Column(String(500), nullable=True)  # For email templates
     body = Column(Text, nullable=False)
     variables = Column(JSON, nullable=False, default=list)  # ["name", "email"]
-    metadata = Column(JSON, nullable=True, default=dict)
+    template_metadata = Column(JSON, nullable=True, default=dict)
     is_current = Column(Boolean, default=True, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     created_by = Column(String(100), nullable=True)
     
     # Relationship
@@ -77,8 +77,8 @@ class TemplateTranslation(Base):
     subject = Column(String(500), nullable=True)
     body = Column(Text, nullable=False)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
     
     # Relationship
     template = relationship("Template", back_populates="translations")

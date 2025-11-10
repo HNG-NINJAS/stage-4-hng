@@ -15,11 +15,13 @@ class TemplateRenderer:
     
     def __init__(self):
         """Initialize Jinja2 environment"""
+        from jinja2 import StrictUndefined
         self.env = Environment(
             loader=BaseLoader(),
             autoescape=False,
             trim_blocks=True,
-            lstrip_blocks=True
+            lstrip_blocks=True,
+            undefined=StrictUndefined
         )
     
     def render(self, template_string: str, data: Dict[str, Any]) -> str:

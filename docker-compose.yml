@@ -1,0 +1,271 @@
+version: '3.8'
+
+services:
+  # ==================== Message Queue ====================
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: notification_rabbitmq
+    ports:
+      - "5672:5672" # AMQP port
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - notification_network
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==================== Cache/Session Store ====================
+  redis:
+    image: redis:7-alpine
+    container_name: notification_redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass redis123
+    volumes:
+      - redis_data:/data
+    networks:
+      - notification_network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==================== Databases ====================
+
+  # PostgreSQL - User Service
+  postgres_user:
+    image: postgres:15-alpine
+    container_name: notification_postgres_user
+    environment:
+      POSTGRES_DB: user_service
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_user_data:/var/lib/postgresql/data
+    networks:
+      - notification_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d user_service" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL - Template Service
+  postgres_template:
+    image: postgres:15-alpine
+    container_name: notification_postgres_template
+    environment:
+      POSTGRES_DB: template_service
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_template_data:/var/lib/postgresql/data
+    networks:
+      - notification_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d template_service" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==================== Monitoring ====================
+
+  # Prometheus - Metrics Collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: notification_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - notification_network
+    restart: unless-stopped
+
+  # Grafana - Metrics Visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: notification_grafana
+    ports:
+      - "3005:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+    networks:
+      - notification_network
+    restart: unless-stopped
+
+  # Jaeger - Distributed Tracing
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: notification_jaeger
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "14268:14268" # HTTP collector
+      - "6831:6831/udp" # Compact thrift protocol
+    environment:
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+    networks:
+      - notification_network
+    restart: unless-stopped
+
+  # ==================== Microservices ====================
+
+  # API Gateway Service (Node.js/TypeScript)
+  # api-gateway:
+  #   build:
+  #     context: ./services/api-gateway
+  #     dockerfile: Dockerfile
+  #   container_name: notification_api_gateway
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     NODE_ENV: development
+  #     PORT: 3000
+  #     RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+  #     REDIS_URL: redis://:redis123@redis:6379
+  #     USER_SERVICE_URL: http://user-service:3001
+  #     TEMPLATE_SERVICE_URL: http://template-service:3004
+  #   depends_on:
+  #     rabbitmq:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - notification_network
+  #   restart: unless-stopped
+
+  # User Service (.NET/C#)
+  # user-service:
+  #   build:
+  #     context: ./services/user-service
+  #     dockerfile: Dockerfile
+  #   container_name: notification_user_service
+  #   ports:
+  #     - "3001:3001"
+  #   environment:
+  #     ASPNETCORE_ENVIRONMENT: Development
+  #     ConnectionStrings__DefaultConnection: "Host=postgres_user;Port=5432;Database=user_service;Username=admin;Password=admin123"
+  #     Redis__ConnectionString: "redis:6379,password=redis123"
+  #   depends_on:
+  #     postgres_user:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - notification_network
+  #   restart: unless-stopped
+
+  # Email Service (Python)
+  # email-service:
+  #   build:
+  #     context: ./services/email-service
+  #     dockerfile: Dockerfile
+  #   container_name: notification_email_service
+  #   environment:
+  #     RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+  #     TEMPLATE_SERVICE_URL: http://template-service:3004
+  #     SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+  #     SMTP_PORT: ${SMTP_PORT:-587}
+  #     SMTP_USER: ${SMTP_USER}
+  #     SMTP_PASSWORD: ${SMTP_PASSWORD}
+  #   depends_on:
+  #     rabbitmq:
+  #       condition: service_healthy
+  #     template-service:
+  #       condition: service_healthy
+  #   networks:
+  #     - notification_network
+  #   restart: unless-stopped
+
+  # Push Service (Member 4's language)
+  # push-service:
+  #   build:
+  #     context: ./services/push-service
+  #     dockerfile: Dockerfile
+  #   container_name: notification_push_service
+  #   environment:
+  #     RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+  #     TEMPLATE_SERVICE_URL: http://template-service:3004
+  #     FCM_API_KEY: ${FCM_API_KEY}
+  #   depends_on:
+  #     rabbitmq:
+  #       condition: service_healthy
+  #     template-service:
+  #       condition: service_healthy
+  #   networks:
+  #     - notification_network
+  #   restart: unless-stopped
+
+  # Template Service (Python/FastAPI) - YOUR SERVICE
+  template-service:
+    build:
+      context: ./services/template-service
+      dockerfile: Dockerfile
+    container_name: notification_template_service
+    ports:
+      - "3004:3004"
+    environment:
+      DATABASE_URL: postgresql://admin:admin123@postgres_template:5432/template_service
+      REDIS_URL: redis://:redis123@redis:6379/0
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672/
+      SERVICE_NAME: template-service
+      SERVICE_VERSION: 1.0.0
+      PORT: 3004
+      ENVIRONMENT: development
+      DEBUG: "True"
+      LOG_LEVEL: INFO
+    depends_on:
+      postgres_template:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - notification_network
+    volumes:
+      - ./services/template-service:/app
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3004/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+# ==================== Volumes ====================
+volumes:
+  rabbitmq_data:
+  redis_data:
+  postgres_user_data:
+  postgres_template_data:
+  prometheus_data:
+  grafana_data:
+
+    # ==================== Networks ====================
+networks:
+  notification_network:
+    driver: bridge

@@ -3,8 +3,7 @@ Database configuration and session management
 """
 
 from sqlalchemy import create_engine, event
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from sqlalchemy.pool import Pool
 from app.config import get_settings
 import logging
