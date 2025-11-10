@@ -61,7 +61,7 @@ model NotificationLog {
   attempts             Int                    @default(0)
   error_message        String?                @db.Text()
   //Provider response 
-  provider_message_id  String                 @db.VarChar(255)
+  provider_message_id  String?                 @db.VarChar(255)
   provider_status_code Int?
   provider_response    Json?
   //TimeStamps
