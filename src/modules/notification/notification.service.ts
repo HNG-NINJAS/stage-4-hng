@@ -42,7 +42,7 @@ export class NotificationService {
       },
     };
   }
-  async userNotifications(user_id:string){
+  async getUserNotifications(user_id:string){
         const notification = await this.sf.findUserById(user_id)
         if (!notification) throw new HttpException("Notification not found for this user ", HttpStatus.BAD_REQUEST)
             return {
