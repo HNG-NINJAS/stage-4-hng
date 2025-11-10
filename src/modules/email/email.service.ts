@@ -1,8 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NotificationRepository } from '../notification/notification.repository';
-import { Subject } from 'rxjs';
-import { error } from 'console';
+
 
 interface EmailMessageQueue{
     notification_id:string,
