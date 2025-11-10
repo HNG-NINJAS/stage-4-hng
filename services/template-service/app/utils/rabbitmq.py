@@ -22,7 +22,7 @@ class RabbitMQClient:
         self.channel = None
         self.circuit_breaker = CircuitBreaker(
             fail_max=5,
-            timeout_duration=60,
+            reset_timeout=60,
             name="rabbitmq_breaker"
         )
     

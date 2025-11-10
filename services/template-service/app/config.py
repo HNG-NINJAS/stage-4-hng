@@ -2,13 +2,19 @@
 Configuration management using Pydantic Settings
 """
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
 from functools import lru_cache
-from typing import Optional
+from typing import Optional, List, Union
 
 
 class Settings(BaseSettings):
     """Application settings"""
+    
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=False
+    )
     
     # Database
     database_url: str
@@ -35,14 +41,21 @@ class Settings(BaseSettings):
     api_prefix: str = "/api/v1"
     
     # CORS
-    cors_origins: list = ["*"]
+    cors_origins: Union[List[str], str] = ["*"]
     
     # Cache TTL (seconds)
     cache_ttl: int = 300  # 5 minutes
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    @field_validator('cors_origins', mode='before')
+    @classmethod
+    def parse_cors_origins(cls, v):
+        """Parse CORS origins from string or list"""
+        if isinstance(v, str):
+            # Handle comma-separated string or single value
+            if ',' in v:
+                return [origin.strip() for origin in v.split(',')]
+            return [v.strip()]
+        return v
 
 
 @lru_cache()
