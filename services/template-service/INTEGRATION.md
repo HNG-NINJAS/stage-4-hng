@@ -485,3 +485,5 @@ After running `python scripts/seed_templates.py`, these templates are available:
 | `account_verification` | email | Email verification | `name`, `verification_code`, `verification_link`, `expiry_minutes` |
 
 ---
+
+[Next →]()

@@ -348,3 +348,5 @@ docker-compose logs -f template-service
 # Stop services
 docker-compose down
 ```
+
+                                                    [Intergration guid →](./INTEGRATION.md)
