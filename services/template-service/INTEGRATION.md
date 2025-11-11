@@ -486,4 +486,4 @@ After running `python scripts/seed_templates.py`, these templates are available:
 
 ---
 
-[Next →]()
+[Next →](./INTEGRATION2.md)

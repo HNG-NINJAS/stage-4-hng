@@ -349,4 +349,4 @@ docker-compose logs -f template-service
 docker-compose down
 ```
 
-                                                    [Intergration guid →](./INTEGRATION.md)
+[Intergration guid →](./INTEGRATION.md)
