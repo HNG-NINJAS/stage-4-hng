@@ -23,12 +23,12 @@ export class EmailConsumerService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.connectToRabbitMQ();
+    await this.conectToRabbitMQ();
     await this.startConsuming();
   }
   private async conectToRabbitMQ() {
     try {
-      const url = this.configService.get<string>('rabbitmq.url');
+      const url = this.configService.get<string>('RABBITMQ_URL');
       this.connection = await amqp.connect(url);
       this.channel = await this.connection.createChannel();
       this.logger.log('Connected to RabbitMQ');
@@ -45,9 +45,9 @@ export class EmailConsumerService implements OnModuleInit {
     }
   }
   private async startConsuming() {
-    const queueName = this.configService.get<string>('rabbitmq.queue');
+    const queueName = this.configService.get<string>('RABBITMQ_QUEUE');
     const prefetchCount = this.configService.get<number>(
-      'rabbitmq.prefetchCount',
+      'RABBITMQ_PREFETCHCOUNT',
     );
     // Ensure the queue exists
     await this.channel.assertQueue(queueName, { durable: true });
@@ -68,7 +68,7 @@ export class EmailConsumerService implements OnModuleInit {
         this.logger.error('Error processing message:', error);
         const retryCount =
           (msg.properties.headers['x-retry-count'] as number) || 0;
-        const maxRetries = this.configService.get<number>('retry.maxRetries')!;
+        const maxRetries = this.configService.get<number>('RETRY_MAX_RETRIES')!;
         if (retryCount < maxRetries) {
           const delay =
             Math.pow(2, retryCount) *

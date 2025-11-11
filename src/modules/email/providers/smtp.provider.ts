@@ -20,11 +20,11 @@ export class SmtpProvider {
   }
 
   private initializeTransporter() {
-    const host = this.configService.get<string>('email.smtp.host');
-    const port = this.configService.get<number>('email.smtp.port');
-    const secure = this.configService.get<boolean>('email.smtp.secure');
-    const user = this.configService.get<string>('email.smtp.user')
-    const pass = this.configService.get<string>('email.smtp.pass')
+    const host = this.configService.get<string>('EMAIL_SMTP_HOST');
+    const port = this.configService.get<number>('EMAIL_SMTP_PORT');
+    const secure = this.configService.get<boolean>('EMAIL_SMTP_SECURE');
+    const user = this.configService.get<string>('EMAIL_SMTP_USER')
+    const pass = this.configService.get<string>('EMAIL_SMTP_PASS')
     this.transporter = nodemailer.createTransport({
       host,
       port,
@@ -43,7 +43,7 @@ export class SmtpProvider {
       }
     })
   }
-  async sendEMail(options:SendEmailOptions){
+  async sendEmail(options:SendEmailOptions){
     try{
       const info = await this.transporter.sendMail({
         from:options.from,
