@@ -48,9 +48,12 @@ class TemplateService:
         Raises:
             ValueError: If template_id already exists
         """
-        # Check if template_id already exists
+        # Check if active template_id already exists
         existing = self.db.query(Template).filter(
-            Template.template_id == template_data.template_id
+            and_(
+                Template.template_id == template_data.template_id,
+                Template.is_active == True
+            )
         ).first()
         
         if existing:

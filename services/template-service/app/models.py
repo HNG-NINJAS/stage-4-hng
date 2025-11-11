@@ -2,7 +2,7 @@
 SQLAlchemy database models
 """
 
-from sqlalchemy import Column, String, Text, Boolean, DateTime, JSON, ForeignKey
+from sqlalchemy import Column, String, Text, Boolean, DateTime, JSON, ForeignKey, Index
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
@@ -14,9 +14,13 @@ class Template(Base):
     """Main template table"""
     
     __tablename__ = "templates"
+    __table_args__ = (
+        # Unique constraint only for active templates
+        Index('ix_templates_template_id_active', 'template_id', unique=True, postgresql_where=(Column('is_active') == True)),
+    )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    template_id = Column(String(100), unique=True, nullable=False, index=True)
+    template_id = Column(String(100), nullable=False, index=True)
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     type = Column(String(50), nullable=False, index=True)  # email, push, sms
