@@ -1,26 +1,25 @@
 # Base image
 FROM node:18-alpine
 
-# Create app directory
 WORKDIR /app
 
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
+# Copy package.json & package-lock.json first (for caching)
 COPY package*.json ./
 
-# Install app dependencies
+# Install dependencies
 RUN npm install
 
-# Bundle app source
+# Copy the rest of the app
 COPY . .
 
-# Copy the .env and .env.development files
-# COPY .env .env.development ./
+# Generate Prisma client
+RUN npx prisma generate
 
-# Creates a "dist" folder with the production build
+# Build the production app
 RUN npm run build
 
-# Expose the port on which the app will run
+# Expose port
 EXPOSE 3001
 
-# Start the server using the production build
+# Start the server
 CMD ["npm", "run", "start:prod"]

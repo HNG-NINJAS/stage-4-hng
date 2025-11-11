@@ -22,8 +22,8 @@ enum NotificationStatus {
   OPENED
   CLICKED
 }
-
-enum EmailProvider {
+ 
+ enum EmailProvider {
   SMTP
   MAILGUN
   SENDGRID

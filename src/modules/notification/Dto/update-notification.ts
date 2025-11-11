@@ -1,5 +1,5 @@
 import { IsString,IsInt } from "class-validator";
-import { EmailProvider } from "@prisma/client";
+import { EmailProvider } from '@prisma/client';
 export class UpdateStatusDto{
     @IsString()
      notification_id: string;
@@ -9,7 +9,7 @@ export class UpdateStatusDto{
     email_from: string;
     @IsString()
     subject: string;
-    provider: EmailProvider;
+    provider: 'SMTP';
     @IsString()
     provider_message_id: string;
     @IsInt()
