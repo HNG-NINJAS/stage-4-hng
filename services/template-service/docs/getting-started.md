@@ -188,6 +188,8 @@ pytest tests/test_api.py -v
 
 ## Next Steps
 
-- Review the [API Reference](./api-reference.md)
-- Explore [Integration Guides](./integration/overview.md)
-- Set up [Monitoring](./operations/monitoring.md)
+- Review the [API Reference](./api-reference.md) for complete endpoint documentation
+- Explore [Integration Guides](./integration/overview.md) to integrate with your services
+- Check [Code Examples](./examples/README.md) for ready-to-use client implementations
+- Read [Development Guide](./development.md) if you plan to contribute
+- Set up [Monitoring](./operations/monitoring.md) for production deployments

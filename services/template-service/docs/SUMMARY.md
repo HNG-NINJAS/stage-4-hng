@@ -35,15 +35,16 @@ docs/
 ### For New Users
 1. Start with [Getting Started](./getting-started.md)
 2. Review [API Reference](./api-reference.md)
-3. Check [Examples](./examples/)
+3. Check [Code Examples](./examples/README.md)
 
 ### For Developers
 1. Read [Development Guide](./development.md)
-2. Review [Integration Guide](./integration/README.md)
-3. Use [Client Examples](./examples/)
+2. Review [Architecture](./ARCHITECTURE.md)
+3. Explore [Integration Guides](./integration/overview.md)
+4. Use [Client Examples](./examples/README.md)
 
 ### For DevOps
-1. Check [Deployment Guide](./deployment.md)
+1. Check [Deployment Guide](./operations/deployment.md)
 2. Review [Monitoring Guide](./operations/monitoring.md)
 3. Understand [Database Operations](./operations/database.md)
 
@@ -104,8 +105,11 @@ docs/
 
 ## External Resources
 
-- [FastAPI Documentation](https://fastapi.tiangolo.com/)
-- [Jinja2 Documentation](https://jinja.palletsprojects.com/)
-- [SQLAlchemy Documentation](https://docs.sqlalchemy.org/)
-- [RabbitMQ Documentation](https://www.rabbitmq.com/documentation.html)
-- [Redis Documentation](https://redis.io/documentation)
+- [FastAPI Documentation](https://fastapi.tiangolo.com/) - Web framework
+- [Jinja2 Documentation](https://jinja.palletsprojects.com/) - Template engine
+- [SQLAlchemy Documentation](https://docs.sqlalchemy.org/) - ORM
+- [Alembic Documentation](https://alembic.sqlalchemy.org/) - Database migrations
+- [RabbitMQ Documentation](https://www.rabbitmq.com/documentation.html) - Message broker
+- [Redis Documentation](https://redis.io/documentation) - Caching
+- [Prometheus Documentation](https://prometheus.io/docs/) - Metrics
+- [Kubernetes Documentation](https://kubernetes.io/docs/) - Container orchestration

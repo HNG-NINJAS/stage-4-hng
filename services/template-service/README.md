@@ -58,7 +58,9 @@ Complete documentation is available in the `docs/` directory:
 
 ### Getting Started
 - [Quick Start Guide](./docs/getting-started.md) - Setup and run the service
+- [Development Guide](./docs/development.md) - Development setup and workflow
 - [API Reference](./docs/api-reference.md) - Complete API documentation
+- [Architecture](./docs/ARCHITECTURE.md) - System design and architecture
 
 ### Integration Guides
 - [Integration Overview](./docs/integration/overview.md) - Integration patterns and best practices
