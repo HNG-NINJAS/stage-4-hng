@@ -1,0 +1,28 @@
+# Node modules - large folder, not needed in Git
+node_modules/
+dist/
+build/
+
+# Environment files with secrets
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Testing
+coverage/
+.jest/
+
+# Prisma
+.prisma/
