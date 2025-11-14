@@ -1,0 +1,377 @@
+{
+    "info": {
+        "name": "Notification System - Production",
+        "description": "Complete API collection for the Notification System deployed on AWS EC2",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Health Checks",
+            "item": [
+                {
+                    "name": "API Gateway Health",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/health",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        },
+                        "description": "Check if API Gateway is healthy"
+                    }
+                },
+                {
+                    "name": "Template Service Health",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{template_url}}/health",
+                            "host": [
+                                "{{template_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        },
+                        "description": "Check if Template Service is healthy"
+                    }
+                },
+                {
+                    "name": "Push Service Health",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{push_url}}/health",
+                            "host": [
+                                "{{push_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        },
+                        "description": "Check if Push Service is healthy"
+                    }
+                },
+                {
+                    "name": "Email Service Health",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{email_url}}/health",
+                            "host": [
+                                "{{email_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        },
+                        "description": "Check if Email Service is healthy"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Templates",
+            "item": [
+                {
+                    "name": "Get All Templates",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{template_url}}/api/v1/templates",
+                            "host": [
+                                "{{template_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "templates"
+                            ]
+                        },
+                        "description": "Retrieve all notification templates"
+                    }
+                },
+                {
+                    "name": "Get Template by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{template_url}}/api/v1/templates/welcome",
+                            "host": [
+                                "{{template_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "templates",
+                                "welcome"
+                            ]
+                        },
+                        "description": "Get a specific template by ID"
+                    }
+                },
+                {
+                    "name": "Create Template",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"custom-notification\",\n  \"type\": \"push\",\n  \"subject\": \"Custom Notification\",\n  \"body\": \"Hello {{name}}, you have a new {{item}}!\",\n  \"variables\": [\"name\", \"item\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{template_url}}/api/v1/templates",
+                            "host": [
+                                "{{template_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "templates"
+                            ]
+                        },
+                        "description": "Create a new notification template"
+                    }
+                },
+                {
+                    "name": "Update Template",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"subject\": \"Updated Subject\",\n  \"body\": \"Updated body with {{variable}}\",\n  \"variables\": [\"variable\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{template_url}}/api/v1/templates/custom-notification",
+                            "host": [
+                                "{{template_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "templates",
+                                "custom-notification"
+                            ]
+                        },
+                        "description": "Update an existing template"
+                    }
+                },
+                {
+                    "name": "Delete Template",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{template_url}}/api/v1/templates/custom-notification",
+                            "host": [
+                                "{{template_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "templates",
+                                "custom-notification"
+                            ]
+                        },
+                        "description": "Delete a template"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Notifications",
+            "item": [
+                {
+                    "name": "Send Push Notification",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"type\": \"push\",\n  \"userId\": \"user123\",\n  \"templateId\": \"welcome\",\n  \"data\": {\n    \"name\": \"John Doe\",\n    \"action\": \"signed up\"\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/notifications/send",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "notifications",
+                                "send"
+                            ]
+                        },
+                        "description": "Send a push notification using a template"
+                    }
+                },
+                {
+                    "name": "Send Email Notification",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"type\": \"email\",\n  \"userId\": \"user456\",\n  \"templateId\": \"password-reset\",\n  \"data\": {\n    \"name\": \"Jane Smith\",\n    \"resetLink\": \"https://example.com/reset/abc123\"\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/notifications/send",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "notifications",
+                                "send"
+                            ]
+                        },
+                        "description": "Send an email notification using a template"
+                    }
+                },
+                {
+                    "name": "Bulk Send Notifications",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"notifications\": [\n    {\n      \"type\": \"push\",\n      \"userId\": \"user1\",\n      \"templateId\": \"welcome\",\n      \"data\": {\"name\": \"User One\"}\n    },\n    {\n      \"type\": \"email\",\n      \"userId\": \"user2\",\n      \"templateId\": \"welcome\",\n      \"data\": {\"name\": \"User Two\"}\n    }\n  ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/notifications/bulk",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "notifications",
+                                "bulk"
+                            ]
+                        },
+                        "description": "Send multiple notifications at once"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Direct Service Calls",
+            "item": [
+                {
+                    "name": "Push Service - Send Direct",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"userId\": \"user123\",\n  \"title\": \"Direct Push\",\n  \"body\": \"This is a direct push notification\",\n  \"data\": {\"key\": \"value\"}\n}"
+                        },
+                        "url": {
+                            "raw": "{{push_url}}/api/v1/push/send",
+                            "host": [
+                                "{{push_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "push",
+                                "send"
+                            ]
+                        },
+                        "description": "Send push notification directly (bypassing gateway)"
+                    }
+                },
+                {
+                    "name": "Email Service - Send Direct",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"to\": \"user@example.com\",\n  \"subject\": \"Direct Email\",\n  \"body\": \"This is a direct email\",\n  \"html\": \"<h1>Direct Email</h1><p>This is a direct email</p>\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{email_url}}/api/v1/email/send",
+                            "host": [
+                                "{{email_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "email",
+                                "send"
+                            ]
+                        },
+                        "description": "Send email directly (bypassing gateway)"
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://51.20.141.174:3000",
+            "type": "string"
+        },
+        {
+            "key": "template_url",
+            "value": "http://51.20.141.174:3004",
+            "type": "string"
+        },
+        {
+            "key": "push_url",
+            "value": "http://51.20.141.174:3003",
+            "type": "string"
+        },
+        {
+            "key": "email_url",
+            "value": "http://51.20.141.174:3005",
+            "type": "string"
+        }
+    ]
+}
