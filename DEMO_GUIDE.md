@@ -1,6 +1,6 @@
 # Complete Demo Guide (Without User Service)
 
-## Understanding the Architecture
+## Understanding the Architecture 
 
 The notification system has **two independent parts**:
 
