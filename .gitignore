@@ -67,7 +67,7 @@ docker-compose.override.yml
 
 # Internal documentation (not for public repo)
 docs/archive/
-docs/internal/
+# docs/internal/ - Now included in repo for team reference
 CLEANUP_SUMMARY.md
 *_SUMMARY.txt
 *_READY.txt
