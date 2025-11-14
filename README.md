@@ -39,13 +39,13 @@ The system consists of 5 microservices working together:
 
 ### Services
 
-| Service | Port | Technology | Status | Description |
-|---------|------|------------|--------|-------------|
-| **API Gateway** | 3000 | Node.js/Express | ✅ Ready | Routes requests to services |
-| **Template Service** | 3004 | Python/FastAPI | ✅ Ready | Manages notification templates |
-| **Push Service** | 3003 | Python/FastAPI | ✅ Ready | Sends push notifications (FCM) |
-| **Email Service** | 3005 | Python/FastAPI | ✅ Ready | Sends emails (mock mode) |
-| **User Service** | 3001 | NestJS/TypeScript | ✅ Ready | Manages users & preferences |
+| Service              | Port | Technology        | Status  | Description                    |
+| -------------------- | ---- | ----------------- | ------- | ------------------------------ |
+| **API Gateway**      | 3000 | Node.js/Express   | ✅ Ready | Routes requests to services    |
+| **Template Service** | 3004 | Python/FastAPI    | ✅ Ready | Manages notification templates |
+| **Push Service**     | 3003 | Python/FastAPI    | ✅ Ready | Sends push notifications (FCM) |
+| **Email Service**    | 3005 | Python/FastAPI    | ✅ Ready | Sends emails (mock mode)       |
+| **User Service**     | 3001 | NestJS/TypeScript | ✅ Ready | Manages users & preferences    |
 
 ### Infrastructure
 
@@ -91,16 +91,16 @@ The system consists of 5 microservices working together:
 
 ## 🔌 Service Ports
 
-| Service | Port | URL |
-|---------|------|-----|
-| API Gateway | 3000 | http://localhost:3000 |
-| Push Service | 3003 | http://localhost:3003 |
-| Template Service | 3004 | http://localhost:3004 |
-| Email Service | 3005 | http://localhost:3005 |
-| PostgreSQL | 5433 | localhost:5433 (internal) |
-| RabbitMQ | 5672 | localhost:5672 (internal) |
-| RabbitMQ UI | 15672 | http://localhost:15672 |
-| Redis | 6379 | localhost:6379 (internal) |
+| Service          | Port  | URL                       |
+| ---------------- | ----- | ------------------------- |
+| API Gateway      | 3000  | http://localhost:3000     |
+| Push Service     | 3003  | http://localhost:3003     |
+| Template Service | 3004  | http://localhost:3004     |
+| Email Service    | 3005  | http://localhost:3005     |
+| PostgreSQL       | 5433  | localhost:5433 (internal) |
+| RabbitMQ         | 5672  | localhost:5672 (internal) |
+| RabbitMQ UI      | 15672 | http://localhost:15672    |
+| Redis            | 6379  | localhost:6379 (internal) |
 
 **Note:** Port 5433 is used for PostgreSQL to avoid conflicts with local PostgreSQL on port 5432.
 
@@ -380,13 +380,50 @@ MIT License
 4. Test thoroughly
 5. Submit a pull request
 
+## � Monitotring & Health Checks
+
+### Quick Health Check
+
+```bash
+# Check all services
+./scripts/health-check.sh
+
+# Or manually
+curl http://YOUR_EC2_IP:3000/health  # API Gateway
+curl http://YOUR_EC2_IP:3004/health  # Template Service
+curl http://YOUR_EC2_IP:3003/health  # Push Service
+curl http://YOUR_EC2_IP:3005/health  # Email Service
+```
+
+### Monitor Logs
+
+```bash
+# Check for errors
+./scripts/monitor-logs.sh
+
+# View live logs
+docker-compose -f docker-compose.minimal.yml logs -f
+
+# View specific service
+docker-compose -f docker-compose.minimal.yml logs api-gateway
+```
+
+### RabbitMQ Dashboard
+
+Access at: `http://YOUR_EC2_IP:15672`
+- Username: `admin`
+- Password: `admin123`
+
+For complete monitoring guide, see [docs/MONITORING.md](./docs/MONITORING.md)
+
 ## 📧 Support
 
 For issues or questions:
 1. Check service logs: `docker-compose logs [service-name]`
-2. Review documentation in `docs/` directory
-3. Check service-specific READMEs
-4. Open an issue on GitHub
+2. Run health checks: `./scripts/health-check.sh`
+3. Review [docs/MONITORING.md](./docs/MONITORING.md)
+4. Check service-specific READMEs
+5. Open an issue on GitHub
 
 ## 🎉 Acknowledgments
 
