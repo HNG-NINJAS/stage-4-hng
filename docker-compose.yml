@@ -134,71 +134,90 @@ services:
   # ==================== Microservices ====================
 
   # API Gateway Service (Node.js/TypeScript)
-  # api-gateway:
-  #   build:
-  #     context: ./services/api-gateway
-  #     dockerfile: Dockerfile
-  #   container_name: notification_api_gateway
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     NODE_ENV: development
-  #     PORT: 3000
-  #     RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
-  #     REDIS_URL: redis://:redis123@redis:6379
-  #     USER_SERVICE_URL: http://user-service:3001
-  #     TEMPLATE_SERVICE_URL: http://template-service:3004
-  #   depends_on:
-  #     rabbitmq:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
-  #   networks:
-  #     - notification_network
-  #   restart: unless-stopped
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    container_name: notification_api_gateway
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672/
+      REDIS_URL: redis://:redis123@redis:6379
+      USER_SERVICE_URL: http://user-service:3001
+      TEMPLATE_SERVICE_URL: http://template-service:3004
+      PUSH_SERVICE_URL: http://push-service:3003
+      EMAIL_SERVICE_URL: http://email-service:3005
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      template-service:
+        condition: service_healthy
+    networks:
+      - notification_network
+    restart: unless-stopped
 
-  # User Service (.NET/C#)
-  # user-service:
-  #   build:
-  #     context: ./services/user-service
-  #     dockerfile: Dockerfile
-  #   container_name: notification_user_service
-  #   ports:
-  #     - "3001:3001"
-  #   environment:
-  #     ASPNETCORE_ENVIRONMENT: Development
-  #     ConnectionStrings__DefaultConnection: "Host=postgres_user;Port=5432;Database=user_service;Username=admin;Password=admin123"
-  #     Redis__ConnectionString: "redis:6379,password=redis123"
-  #   depends_on:
-  #     postgres_user:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
-  #   networks:
-  #     - notification_network
-  #   restart: unless-stopped
+  # User Service (NestJS)
+  user-service:
+    build:
+      context: ./services/user-service/packages
+      dockerfile: Dockerfile
+    container_name: notification_user_service
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      NODE_ENV: development
+      DATABASE_URL: "postgresql://admin:admin123@postgres_user:5432/user_service"
+      JWT_SECRET: "your-secret-key-change-in-production"
+      JWT_EXPIRATION: "3600"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: redis123
+      LOG_LEVEL: debug
+    depends_on:
+      postgres_user:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - notification_network
+    restart: unless-stopped
 
-  # Email Service (Python)
-  # email-service:
-  #   build:
-  #     context: ./services/email-service
-  #     dockerfile: Dockerfile
-  #   container_name: notification_email_service
-  #   environment:
-  #     RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
-  #     TEMPLATE_SERVICE_URL: http://template-service:3004
-  #     SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
-  #     SMTP_PORT: ${SMTP_PORT:-587}
-  #     SMTP_USER: ${SMTP_USER}
-  #     SMTP_PASSWORD: ${SMTP_PASSWORD}
-  #   depends_on:
-  #     rabbitmq:
-  #       condition: service_healthy
-  #     template-service:
-  #       condition: service_healthy
-  #   networks:
-  #     - notification_network
-  #   restart: unless-stopped
+  # Email Service (Python - Mock)
+  email-service:
+    build:
+      context: ./services/email-service
+      dockerfile: Dockerfile
+    container_name: notification_email_service
+    ports:
+      - "3005:3005"
+    environment:
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672/
+      TEMPLATE_SERVICE_URL: http://template-service:3004
+      SERVICE_NAME: email-service
+      SERVICE_VERSION: 1.0.0
+      PORT: 3005
+      ENVIRONMENT: development
+      DEBUG: "True"
+      LOG_LEVEL: INFO
+      WORKER_ENABLED: "True"
+      WORKER_PREFETCH_COUNT: 10
+      MOCK_MODE: "True"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      template-service:
+        condition: service_healthy
+    networks:
+      - notification_network
+    volumes:
+      - ./services/email-service:/app
+    restart: unless-stopped
 
 
   # Push Service

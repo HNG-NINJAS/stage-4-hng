@@ -65,6 +65,19 @@ docker-compose.override.yml
 # Project-specific ignores
 # ============================================
 
+# Internal documentation (not for public repo)
+docs/archive/
+docs/internal/
+CLEANUP_SUMMARY.md
+*_SUMMARY.txt
+*_READY.txt
+BUILD_*.md
+CONTAINER_*.md
+NETWORK_*.md
+PORT_*.md
+STOP_*.md
+FINAL_*.md
+
 # Logs for all services
 services/*/logs/
 logs/
