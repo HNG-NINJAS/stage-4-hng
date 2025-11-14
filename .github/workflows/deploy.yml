@@ -153,6 +153,6 @@ jobs:
         if: failure()
         run: |
           echo "❌ Deployment failed!"
-          echo "Check logs for details"
+          echo "Check logs for detail"
 curl -fsSL https://raw.githubusercontent.com/HNG-NINJAS/stage-4-hng/main/scripts/setup-ec2.sh -o setup-ec2.sh
 curl -fsSL https://raw.githubusercontent.com/HNG-NINJAS/stage-4-hng/main/scripts/setup-ec2.sh -o setup-ec2.sh
