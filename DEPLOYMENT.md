@@ -176,3 +176,21 @@ docker-compose -f docker-compose.minimal.yml exec postgres_template \
 docker-compose -f docker-compose.minimal.yml down -v
 docker-compose -f docker-compose.minimal.yml up -d
 ```
+
+## AWS EC2 Deployment with GitHub Actions
+
+For automated production deployment on AWS EC2 with CI/CD:
+
+See **[docs/AWS_DEPLOYMENT.md](./docs/AWS_DEPLOYMENT.md)** for complete guide including:
+- EC2 instance setup
+- GitHub Actions configuration
+- SSL/HTTPS setup
+- Security best practices
+- Monitoring and troubleshooting
+
+## Next Steps
+
+- **For Demo**: See [DEMO_GUIDE.md](./DEMO_GUIDE.md)
+- **For AWS Deployment**: See [docs/AWS_DEPLOYMENT.md](./docs/AWS_DEPLOYMENT.md)
+- **For API Examples**: See [EXAMPLE_REQUESTS.md](./EXAMPLE_REQUESTS.md)
+- **For Architecture**: See [README.md](./README.md)
