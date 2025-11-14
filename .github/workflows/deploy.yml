@@ -95,19 +95,11 @@ jobs:
               git pull origin main || git pull origin master
             fi
             
-            # Setup environment file
+            # Setup environment file if it doesn't exist
             if [ ! -f .env ]; then
               echo "⚙️ Creating .env file from production template..."
               cp .env.production .env
               echo "⚠️  WARNING: Update .env with production passwords!"
-            else
-              # Validate .env file
-              if ! grep -q "NODE_ENV" .env 2>/dev/null; then
-                echo "⚠️  .env file appears corrupted, recreating..."
-                cp .env.production .env
-              else
-                echo "✅ .env file exists and looks valid"
-              fi
             fi
             
             # Stop services (if running)
