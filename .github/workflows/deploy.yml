@@ -61,6 +61,29 @@ jobs:
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'ENDSSH'
             set -e
             
+            # Check prerequisites
+            echo "🔍 Checking prerequisites..."
+            
+            if ! command -v docker &> /dev/null; then
+              echo "❌ ERROR: Docker is not installed!"
+              echo "Please run the setup script first:"
+              echo "  curl -fsSL https://raw.githubusercontent.com/HNG-NINJAS/stage-4-hng/main/scripts/setup-ec2.sh -o setup-ec2.sh"
+              echo "  chmod +x setup-ec2.sh"
+              echo "  ./setup-ec2.sh"
+              exit 1
+            fi
+            
+            if ! command -v docker-compose &> /dev/null; then
+              echo "❌ ERROR: Docker Compose is not installed!"
+              echo "Please run the setup script first:"
+              echo "  curl -fsSL https://raw.githubusercontent.com/HNG-NINJAS/stage-4-hng/main/scripts/setup-ec2.sh -o setup-ec2.sh"
+              echo "  chmod +x setup-ec2.sh"
+              echo "  ./setup-ec2.sh"
+              exit 1
+            fi
+            
+            echo "✅ Prerequisites check passed"
+            
             # Check if project directory exists
             if [ ! -d ~/notification-system ]; then
               echo "📁 First time setup - cloning repository..."
