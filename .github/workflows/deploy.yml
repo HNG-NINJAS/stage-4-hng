@@ -64,11 +64,11 @@ jobs:
             # Check if project directory exists
             if [ ! -d ~/notification-system ]; then
               echo "📁 First time setup - cloning repository..."
-              git clone https://github.com/HNG-NINJAS/stage-4-hng.git ~/notification-system
-              cd ~/notification-system
+              git clone https://github.com/HNG-NINJAS/stage-4-hng.git ~/stage-4-hng
+              cd ~/stage-4-hng
             else
               echo "📂 Project exists - pulling latest changes..."
-              cd ~/notification-system
+              cd ~/stage-4-hng
               git pull origin main || git pull origin master
             fi
             
