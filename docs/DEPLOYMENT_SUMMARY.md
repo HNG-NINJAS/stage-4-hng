@@ -123,13 +123,17 @@ git push origin main
 - **Data transfer**: ~$5-10/month
 - **Total**: ~$35-70/month
 
-## 📝 Required GitHub Secrets
+## 📝 Required GitHub Secrets (SSH-Based)
+
+Only **3 secrets** needed for SSH deployment:
 
 | Secret | Description | Example |
 |--------|-------------|---------|
 | `EC2_HOST` | EC2 public IP | 54.123.45.67 |
 | `EC2_USER` | EC2 username | ubuntu |
-| `EC2_SSH_KEY` | SSH private key | -----BEGIN RSA PRIVATE KEY----- ... |
+| `EC2_SSH_KEY` | Full SSH private key (.pem) | -----BEGIN RSA PRIVATE KEY----- ... |
+
+**Note**: No AWS credentials needed! Deployment uses SSH only.
 
 ## 🔄 Deployment Flow
 

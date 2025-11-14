@@ -1,4 +1,15 @@
-name: Deploy to AWS EC2
+# GitHub Actions Workflow for EC2 Deployment
+# 
+# This workflow deploys to EC2 using SSH (no AWS credentials needed)
+# 
+# Required Secrets:
+#   - EC2_HOST: Your EC2 public IP address
+#   - EC2_USER: SSH username (usually 'ubuntu')
+#   - EC2_SSH_KEY: Your SSH private key (.pem file content)
+#
+# See docs/SSH_DEPLOYMENT_GUIDE.md for detailed setup instructions
+
+name: Deploy to AWS EC2 via SSH
 
 on:
   push:
@@ -12,30 +23,25 @@ env:
 
 jobs:
   deploy:
-    name: Deploy to EC2
+    name: Deploy to EC2 via SSH
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Deploy to EC2
+      - name: Deploy to EC2 via SSH
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
-          # Setup SSH
+          # Setup SSH key
           mkdir -p ~/.ssh
           echo "$EC2_SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
+          
+          # Add EC2 host to known_hosts
           ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
           
           # Deploy to EC2
@@ -69,16 +75,22 @@ jobs:
             echo "Deployment completed successfully!"
           ENDSSH
 
-      - name: Health Check
+      - name: Health Check via SSH
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
         run: |
           sleep 10
-          curl -f http://$EC2_HOST:3000/health || exit 1
-          curl -f http://$EC2_HOST:3004/health || exit 1
-          curl -f http://$EC2_HOST:3003/health || exit 1
-          curl -f http://$EC2_HOST:3005/health || exit 1
-          echo "All services are healthy!"
+          
+          # Run health checks via SSH
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'ENDSSH'
+            echo "Running health checks..."
+            curl -f http://localhost:3000/health || exit 1
+            curl -f http://localhost:3004/health || exit 1
+            curl -f http://localhost:3003/health || exit 1
+            curl -f http://localhost:3005/health || exit 1
+            echo "✅ All services are healthy!"
+          ENDSSH
 
       - name: Notify Success
         if: success()

@@ -52,16 +52,22 @@ curl http://localhost:3005/health
 
 ## 🤖 GitHub Actions Auto-Deploy
 
-### Configure GitHub Secrets
+### Configure GitHub Secrets (SSH Deployment)
 Go to: GitHub → Your Repo → Settings → Secrets and variables → Actions
 
-Add these 3 secrets:
+Add these **3 secrets** for SSH-based deployment:
 
 | Secret Name | Value |
 |-------------|-------|
 | `EC2_HOST` | Your EC2 public IP (e.g., 54.123.45.67) |
 | `EC2_USER` | `ubuntu` |
-| `EC2_SSH_KEY` | Content of your `.pem` file |
+| `EC2_SSH_KEY` | Full content of your `.pem` file (including BEGIN/END lines) |
+
+**How to get your SSH key:**
+```bash
+cat your-key.pem
+# Copy the entire output including -----BEGIN and -----END lines
+```
 
 ### Deploy
 ```bash
@@ -69,11 +75,13 @@ Add these 3 secrets:
 git push origin main
 
 # GitHub Actions will automatically:
-# 1. SSH to your EC2
+# 1. Connect to EC2 via SSH
 # 2. Pull latest code
-# 3. Build & deploy
-# 4. Run health checks
+# 3. Build & deploy with Docker
+# 4. Run health checks via SSH
 ```
+
+**Note**: Deployment uses SSH only - no AWS API calls needed!
 
 ## 🌐 Access Your Services
 

@@ -67,26 +67,50 @@ exit
 ssh -i your-key.pem ubuntu@your-ec2-public-ip
 ```
 
-## Step 2: Configure GitHub Secrets
+## Step 2: Configure GitHub Secrets for SSH Deployment
+
+**Note**: This deployment uses **SSH only** - no AWS credentials needed!
+
+See **[SSH_DEPLOYMENT_GUIDE.md](./SSH_DEPLOYMENT_GUIDE.md)** for detailed SSH setup and troubleshooting.
 
 Go to your GitHub repository → Settings → Secrets and variables → Actions
 
-Add these secrets:
+Add these **3 secrets** (SSH-based deployment):
 
 | Secret Name | Value | Description |
 |-------------|-------|-------------|
-| `EC2_HOST` | your-ec2-public-ip | EC2 public IP |
-| `EC2_USER` | ubuntu | EC2 username |
-| `EC2_SSH_KEY` | Your private key content | SSH private key |
+| `EC2_HOST` | your-ec2-public-ip | EC2 public IP address |
+| `EC2_USER` | ubuntu | EC2 username (default: ubuntu) |
+| `EC2_SSH_KEY` | Your private key content | Full SSH private key (.pem file) |
 
 ### 2.1 Get SSH Private Key
 
 ```bash
-# Copy your private key content
+# Display your private key
 cat your-key.pem
+
+# Or copy to clipboard (macOS)
+cat your-key.pem | pbcopy
+
+# Or copy to clipboard (Linux with xclip)
+cat your-key.pem | xclip -selection clipboard
 ```
 
-Copy the entire content (including `-----BEGIN RSA PRIVATE KEY-----` and `-----END RSA PRIVATE KEY-----`)
+**Important**: Copy the **entire content** including:
+- `-----BEGIN RSA PRIVATE KEY-----` (or `BEGIN OPENSSH PRIVATE KEY`)
+- All the key content
+- `-----END RSA PRIVATE KEY-----` (or `END OPENSSH PRIVATE KEY`)
+
+Example format:
+```
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEA...
+(many lines of key data)
+...
+-----END RSA PRIVATE KEY-----
+```
+
+**Note**: The deployment uses **SSH only** - no AWS credentials needed in GitHub secrets!
 
 ## Step 3: Clone Repository on EC2
 
@@ -227,9 +251,29 @@ sudo ufw status
 
 ### GitHub Actions SSH Issues
 
-1. Verify EC2_SSH_KEY secret contains full private key
-2. Check EC2_HOST is public IP (not private)
-3. Verify security group allows SSH from GitHub Actions IPs
+**Common SSH problems:**
+
+1. **SSH Key Format**
+   - Verify `EC2_SSH_KEY` contains the full private key
+   - Include `-----BEGIN` and `-----END` lines
+   - No extra spaces or line breaks
+
+2. **Connection Issues**
+   - Check `EC2_HOST` is the public IP (not private IP)
+   - Verify security group allows SSH (port 22) from anywhere (0.0.0.0/0)
+   - GitHub Actions uses dynamic IPs, so you can't restrict to specific IPs
+
+3. **Permission Issues**
+   - Ensure EC2 user is `ubuntu` (default for Ubuntu AMI)
+   - Verify the SSH key matches the one used when launching EC2
+
+4. **Test SSH Connection Manually**
+   ```bash
+   # From your local machine
+   ssh -i your-key.pem ubuntu@YOUR_EC2_IP
+   
+   # If this works, GitHub Actions should work too
+   ```
 
 ## Security Best Practices
 
@@ -263,6 +307,12 @@ For higher traffic:
 3. **RDS** for managed PostgreSQL
 4. **ElastiCache** for managed Redis
 5. **Amazon MQ** for managed RabbitMQ
+
+## Additional Resources
+
+- **SSH Deployment Guide**: [SSH_DEPLOYMENT_GUIDE.md](./SSH_DEPLOYMENT_GUIDE.md) - Detailed SSH setup and troubleshooting
+- **Quick Start**: [../AWS_QUICK_START.md](../AWS_QUICK_START.md) - 5-minute setup guide
+- **Deployment Summary**: [DEPLOYMENT_SUMMARY.md](./DEPLOYMENT_SUMMARY.md) - Quick reference
 
 ## Next Steps
 
